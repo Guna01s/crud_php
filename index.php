@@ -18,8 +18,8 @@
             z-index: 1;
         }
         .text-light {
-        text-decoration: none; 
-        color: inherit; 
+            text-decoration: none; 
+            color: inherit; 
         }
     </style>
 </head>
@@ -30,11 +30,12 @@
                 <div class="card-header text-center d-flex justify-content-between">
                     <button class="btn btn-primary"><a href="add.php" class="text-light">Book</a></button>
                     <h4>ITC GRAND CHOLA</h4>
-                    <div class="d-flex flex-row align-items-center justify-content-center gap-3">
-                        <input type="date" name="from" class="form-control ">
-                        <input type="date" name="to" class="form-control">
-                        <button class="btn btn-success">Download</button>
-                    </div>
+                    
+                        <form action="export.php" method="post" id="download-form" class="d-flex flex-row align-items-center justify-content-center gap-3">
+                            <input type="date" name="from" class="form-control" required>
+                            <input type="date" name="to" class="form-control" required>
+                            <button type="submit" class="btn btn-success">Download</button>
+                        </form>
                 </div>
                 <div class="card-body">
                     <div class="table-container">
@@ -55,43 +56,33 @@
                             </thead>
                             <tbody>
                                 <?php
-                                    $connection = mysqli_connect("localhost", "root", "");
-                                    $db = mysqli_select_db($connection, "cruddata");
-
-                                    $sql = 'SELECT * FROM booking';
-                                    $run = mysqli_query($connection, $sql);
-
-                                    $id = 1;  // Added the missing semicolon
-
-                                    while ($row = mysqli_fetch_array($run)) {
-                                        $uid = $row['id'];
-                                        $uname = $row['name'];
-                                        $uage = $row['age'];
-                                        $uemail = $row['email'];
-                                        $uphone = $row['phone'];
-                                        $uaddress = $row['address'];
-                                        $udate_from = $row['date_from'];
-                                        $udate_to = $row['date_to'];
-                                        $ureason = $row['reason'];
-                                ?>
-                                <tr>
-                                    <td><?php echo $uid; ?></td>
-                                    <td><?php echo $uname; ?></td>
-                                    <td><?php echo $uage; ?></td>
-                                    <td><?php echo $uemail; ?></td>
-                                    <td><?php echo $uphone; ?></td>
-                                    <td><?php echo $uaddress; ?></td>
-                                    <td><?php echo $udate_from; ?></td>
-                                    <td><?php echo $udate_to; ?></td>
-                                    <td><?php echo $ureason; ?></td>
-                                    <td>
-                                        <a href="edit.php?edit=<?php echo $uid; ?>" class="btn bg-info border-0 rounded h-29">U</a>
-                                        <a href="delete.php?del=<?php echo $uid; ?>" onclick="return confirm('Are you sure you want to delete this record?');" class="btn bg-danger border-0 rounded h-29">D</a>
-                                    </td>
-                                </tr>
-                                <?php
-                                    $id++;
+                                    $connection = mysqli_connect("localhost", "root", "", "cruddata");
+                                    if (!$connection) {
+                                        die("Connection failed: " . mysqli_connect_error());
                                     }
+
+                                    $sql = "SELECT * FROM booking";
+                                    $result = mysqli_query($connection, $sql);
+
+                                    while ($row = mysqli_fetch_assoc($result)) {
+                                        echo "<tr>
+                                            <td>{$row['id']}</td>
+                                            <td>{$row['name']}</td>
+                                            <td>{$row['age']}</td>
+                                            <td>{$row['email']}</td>
+                                            <td>{$row['phone']}</td>
+                                            <td>{$row['address']}</td>
+                                            <td>{$row['date_from']}</td>
+                                            <td>{$row['date_to']}</td>
+                                            <td>{$row['reason']}</td>
+                                            <td>
+                                                <a href='edit.php?edit={$row['id']}' class='btn bg-info border-0 rounded h-29'>U</a>
+                                                <a href='delete.php?del={$row['id']}' onclick=\"return confirm('Are you sure you want to delete this record?');\" class='btn bg-danger border-0 rounded h-29'>D</a>
+                                            </td>
+                                        </tr>";
+                                    }
+
+                                    mysqli_close($connection);
                                 ?>
                             </tbody>
                         </table>
@@ -100,5 +91,17 @@
             </div>
         </div>
     </div>
+
+    <script>
+    document.getElementById('download-form').addEventListener('submit', function(event) {
+        var fromDate = document.querySelector('input[name="from"]').value;
+        var toDate = document.querySelector('input[name="to"]').value;
+
+        if (!fromDate || !toDate) {
+            alert('Please select both dates.');
+            event.preventDefault();
+        }
+    });
+    </script>
 </body>
 </html>
